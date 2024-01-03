@@ -1,14 +1,12 @@
 import wpilib
-import wpimath.controller
+import wpilib.deployinfo
 
 import commands2
 import commands2.cmd
 import commands2.button
 
-import constants
-import subsystems.ir_sensor_ss
-import commands.turntoangle
-import commands.turntoangleprofiled
+from constants import Constants
+from subsystems.digital_sensor_ss import DigitalSensorSS
 
 
 class RobotContainer:
@@ -26,44 +24,13 @@ class RobotContainer:
         The container for the robot.  Contains subsystems, OI devices, and
         commands.
         """
+        self.deploy_data = wpilib.deployinfo.getDeployData()
+
         # The robot's subsystems
-        self.ir_sensor = subsystems.ir_sensor_ss.InfraredSensorSubsystem()
-
-        # The driver's controller.  See:
-        # https://robotpy.readthedocs.io/projects/commands-v2/en/latest/commands2.button/CommandXboxController.html#commands2.button.CommandXboxController
-        self.stick = commands2.button.CommandXboxController(
-            constants.OIConstants.kDriverControllerPort
-        )
-
-        # Configure the button bindings
-        self.configureButtonBindings()
-
-
-    def configureButtonBindings(self):
-        """
-        Use this method to define your button->command mappings.  Buttons can
-        be created via the button factories on
-        commands2.button.CommandGenericHID or one of its subclasses
-        (commands2.button.CommandJoystick or
-        command2.button.CommandXboxController).
-        """
-        # Drive at half speed when the right bumper is held
-        self.stick.rightBumper().onTrue(
-            commands2.InstantCommand(
-                (lambda: self.ir_sensor.do_something()), [self.ir_sensor]
-            )
-        ).onFalse(
-            commands2.InstantCommand(
-                (lambda: self.ir_sensor.do_something()), [self.ir_sensor]
-            )
-        )
-
-        # Stabilize robot to drive straight with gyro when left bumper is held
-        self.stick.A().whileTrue(
-            commands2.InstantCommand(
-                (lambda: self.ir_sensor.do_something()), [self.ir_sensor]
-            )
-        )
+        self.limit_sw = DigitalSensorSS(Constants.LIMIT_SW_DIO, "Limit Switch")
+        self.ir = DigitalSensorSS(Constants.IR_DIO, "IR Proximity")
+        self.breakbeam = DigitalSensorSS(Constants.BREAK_BEAM_DIO, "Break-Beam")
+        self.hall = DigitalSensorSS(Constants.HALL_EFFECT_DIO, "Hall Effect")
 
 
     def getAutonomousCommand(self) -> commands2.Command:
