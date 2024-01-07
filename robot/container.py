@@ -7,6 +7,7 @@ import commands2.button
 
 from constants import Constants
 from subsystems.digital_sensor_ss import DigitalSensorSS
+from subsystems.analog_sensor_ss import AnalogSensorSS
 
 
 class RobotContainer:
@@ -31,6 +32,10 @@ class RobotContainer:
         self.ir = DigitalSensorSS(Constants.IR_DIO, "IR Proximity")
         self.breakbeam = DigitalSensorSS(Constants.BREAK_BEAM_DIO, "Break-Beam")
         self.hall = DigitalSensorSS(Constants.HALL_EFFECT_DIO, "Hall Effect")
+        conversion_to_inches = 512.0 / 2.54
+        self.ultrasonic = AnalogSensorSS(
+            Constants.ULTRASONIC_AIO, "Ultrasonic",
+            max_in=1.0, low=0.0, high=conversion_to_inches)
 
 
     def getAutonomousCommand(self) -> commands2.Command:
