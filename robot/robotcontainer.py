@@ -10,7 +10,7 @@ import commands2
 import commands2.button
 import constants
 
-from subsystems.led_ss import LEDSubsystem
+from subsystems.led_ss import LED_5v_Subsystem
 
 class RobotContainer:
     """
@@ -28,7 +28,7 @@ class RobotContainer:
         """
         # The robot's subsystems
 
-        self.led_ss = LEDSubsystem(constants.ELEC.LED_controller_PWM_port)
+        self.led_ss = LED_5v_Subsystem(constants.ELEC.LED_controller_PWM_port)
 
 
     def configureButtonBindings(self):
