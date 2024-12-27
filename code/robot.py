@@ -54,6 +54,7 @@ class Robot(commands2.TimedCommandRobot):
         # teleop starts running. If you want the autonomous to
         # continue until interrupted by another command, remove
         # this line or comment it out.
+        self.container.teleopInit()
         if self.autonomousCommand is not None:
             self.autonomousCommand.cancel()
 
@@ -63,6 +64,9 @@ class Robot(commands2.TimedCommandRobot):
     def testInit(self) -> None:
         # Cancels all running commands at the start of test mode
         commands2.CommandScheduler.getInstance().cancelAll()
+
+    def disabledInit(self) -> None:
+        self.container.disabledInit()
 
 
 if __name__ == "__main__":

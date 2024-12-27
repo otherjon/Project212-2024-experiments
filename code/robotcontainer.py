@@ -42,3 +42,10 @@ class RobotContainer:
 
     def getAutonomousCommand(self):
         return None
+
+    def teleopInit(self):
+        self.led_ss.teleopInit()
+
+    def disabledInit(self):
+        self.led_ss.disabledInit()
+

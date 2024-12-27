@@ -25,14 +25,16 @@ class LED_5v_Subsystem(commands2.Subsystem):
         super().__init__()
         self.length = length
         self.port = pwm_port
-        self.data = self.rainbow(length)
+        self.data = self.rainbow(self.length)
         self.leds = wpilib.AddressableLED(self.port)
-        self.speed = 0
+        self.speed = speed
         self.timer = wpilib.Timer()
+        self.timer.start()
         
         self.leds.setLength(self.length)
         self.leds.setData(self.data)
         self.leds.start()
+        logger.info("Initialized LED subsystem")
 
     @classmethod
     def rainbow(cls, length):
@@ -46,12 +48,26 @@ class LED_5v_Subsystem(commands2.Subsystem):
 
         return result
 
+    @classmethod
+    def off(cls, length):
+        result = []
+        for i in range(length):
+            result.append(wpilib.AddressableLED.LEDData(0, 0, 0))
+        return result
+
         #wpilib.SmartDashboard.putData("LED+1", IncrementLEDCommand(self))
         #wpilib.SmartDashboard.putData("LED-1", DecrementLEDCommand(self))
         #wpilib.SmartDashboard.putData("LED+10", BigIncrementLEDCommand(self))
         #wpilib.SmartDashboard.putData("LED-10", BigDecrementLEDCommand(self))
 
+    def teleopInit(self):
+        self.data = self.rainbow(self.length)
+
+    def disabledInit(self):
+        self.data = self.off(self.length)
+
     def periodic(self):
         if self.timer.advanceIfElapsed(self.speed):
+            logger.info("Updating LED pattern")
             self.data = self.data[1:] + [self.data[0]]
             self.leds.setData(self.data)
