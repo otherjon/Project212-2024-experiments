@@ -8,7 +8,7 @@ class LED_5v_Subsystem(commands2.Subsystem):
     """
     This class represents a subsystem of individually addressable LEDs.
 
-    The following are all equivalent:
+    The following terms are all equivalent:
      * addressable LED strip
      * individually addressable LED strip
      * 5-volt LED strip
@@ -22,15 +22,25 @@ class LED_5v_Subsystem(commands2.Subsystem):
      * all LEDs must be the same color (which can change, but all LEDs change)
     """
     def __init__(self, pwm_port, speed=1.0, length=20) -> None:
+        """
+        Constructor for our LED subsystem.
+        Parameters:
+          pwm_port (int): the number of the PWM port that the LED strip is
+              plugged into
+          speed (float): number of seconds between changes to the LED pattern
+          length (int): number of active LEDs in the strip
+        """
         super().__init__()
         self.length = length
         self.port = pwm_port
-        self.data = self.rainbow(self.length)
         self.leds = wpilib.AddressableLED(self.port)
         self.speed = speed
         self.timer = wpilib.Timer()
         self.timer.start()
-        
+
+        # What colors do we want our LEDs?  How about this...
+        self.data = self.rainbow(self.length)
+
         self.leds.setLength(self.length)
         self.leds.setData(self.data)
         self.leds.start()
@@ -38,6 +48,23 @@ class LED_5v_Subsystem(commands2.Subsystem):
 
     @classmethod
     def rainbow(cls, length):
+        """
+        Return a list of colors (as LEDData objects) that form a rainbow
+        pattern of the given length.
+
+        Parameters:
+          length (int): number of active LEDs in the strip
+
+        Returns:
+          [LEDData("red"), LEDData("orange"), ...]
+          with the pattern repeated until the given length is reached
+          where "red" actually means (255, 0, 0) which is RGB values for red,
+          and "orange" actually means etc. etc.
+
+          In other words, this method returns a list of LEDData objects
+          representing a rainbow pattern, which can be passed in as a parameter
+          to self.leds.setData() if you want to set your LEDs to a rainbow.
+        """
         colors = ((255, 0, 0), (255, 128, 0), (255, 255, 0), (0, 255, 0),
                   (0, 0, 255), (102, 0, 255), (255, 0, 255))
 
@@ -50,23 +77,45 @@ class LED_5v_Subsystem(commands2.Subsystem):
 
     @classmethod
     def off(cls, length):
+        """
+        Return a list of colors (as LEDData objects) that turn off LEDs in a
+        strip of the given length.
+
+        Parameters:
+          length (int): number of active LEDs in the strip
+
+        Returns:
+          [LEDData("off"), LEDData("off"), ...]
+          where "off" actually means (0, 0, 0) which is RGB values for black,
+          which turns off the LED
+
+          In other words, this method returns a list of LEDData objects
+          representing an LED strip that is turned off, which can be passed
+          in as a parameter to self.leds.setData() if you want to turn off
+          your LEDs.
+        """
         result = []
         for i in range(length):
             result.append(wpilib.AddressableLED.LEDData(0, 0, 0))
         return result
 
-        #wpilib.SmartDashboard.putData("LED+1", IncrementLEDCommand(self))
-        #wpilib.SmartDashboard.putData("LED-1", DecrementLEDCommand(self))
-        #wpilib.SmartDashboard.putData("LED+10", BigIncrementLEDCommand(self))
-        #wpilib.SmartDashboard.putData("LED-10", BigDecrementLEDCommand(self))
-
     def teleopInit(self):
+        """
+        Turn on LEDs in a rainbow pattern when teleop mode starts.
+        """
         self.data = self.rainbow(self.length)
 
     def disabledInit(self):
+        """
+        Turn off all LEDs when disabled mode starts.
+        """
         self.data = self.off(self.length)
 
     def periodic(self):
+        """
+        After a time delay given by self.speed, update the LED pattern by
+        shifting all the colors over by one.
+        """
         if self.timer.advanceIfElapsed(self.speed):
             logger.info("Updating LED pattern")
             self.data = self.data[1:] + [self.data[0]]
